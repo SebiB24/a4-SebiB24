@@ -7,8 +7,8 @@ module org.example.a4sebib24 {
     requires org.kordamp.ikonli.javafx;
     requires org.kordamp.bootstrapfx.core;
 
-    opens org.example.a4sebib24 to javafx.fxml;
-    exports org.example.a4sebib24;
+    opens a4 to javafx.fxml;
+    exports a4;
 
     requires java.sql;
     requires org.xerial.sqlitejdbc;

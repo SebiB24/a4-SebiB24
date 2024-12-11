@@ -1,0 +1,4 @@
+2,Telefoane,IPhone,4000
+3,Electrocasnice,Masina de spalat,3000
+4,Televizor,Philips,2500
+5,caine,bun,60

@@ -1,0 +1,16 @@
+=================================================================
+
+Repository = text
+ComandaFile = src/main/java/a4/data/comanda.txt
+ProdusFile = src/main/java/a4/data/produse.txt
+
+==================================================================
+
+Repository = binary
+ComandaFile = src/main/java/a4/data/comanda.bin
+ProdusFile = src/main/java/a4/data/produse.bin
+
+==================================================================
+
+Repository = sql
+URL = jdbc:sqlite:MagazinElectronice.sqlite
