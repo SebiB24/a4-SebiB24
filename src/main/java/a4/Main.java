@@ -51,8 +51,16 @@ public class Main {
             service = new Service(repComanda, repProdus);
             ui = new UI(service);
 
-            MagazinElectronice.launch(MagazinElectronice.class, args);
-            //ui.program();
+            if(prop.getTipRulare().equals("interfata vizuala")){
+                MagazinElectronice.launch(MagazinElectronice.class, args);
+            }else{
+                if(prop.getTipRulare().equals("linie de comanda")){
+                    ui.program();
+                }
+                else
+                    throw new Exception("Invalid run type!");
+            }
+
 
         }
         catch (Exception e) {

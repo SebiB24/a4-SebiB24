@@ -59,4 +59,12 @@ public class Properties {
         }
         return url;
     }
+
+    public String getTipRulare() throws RepositoryException {
+        String tiprulare = properties.get("TipRulare");
+        if (tiprulare == null) {
+            throw new RepositoryException("Lipseste adresa url in fisierul de proprietati.");
+        }
+        return tiprulare;
+    }
 }
