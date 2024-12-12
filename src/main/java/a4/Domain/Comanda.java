@@ -20,16 +20,11 @@ public class Comanda extends Entitate {
         this.produse = produse;
     }
 
-    public Comanda(int id, String date) throws ParseException {
-        super(id);
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-        this.data_livrare = formatter.parse(date);
-        this.produse = new ArrayList<Produs>();
-    }
-
+    /*
     public void addProdus(Produs produs) {
         this.produse.add(produs);
     }
+     */
 
     public String getData_livrare() {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");

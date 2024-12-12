@@ -8,11 +8,11 @@ import a4.Repository.*;
 import a4.Service.Service;
 import a4.UI.UI;
 import a4.config.Properties;
+
+import java.util.ArrayList;
 /*
 TODO
-- SQL la comenzi lista de produse
 - Design visual ui
-- adauga functionalitate 9, 10 in VI
 
  */
 
@@ -41,7 +41,8 @@ public class Main {
                     break;
                 case "sql":
                     repProdus = new SqlRepoProdus(prop.getURL());
-                    repComanda = new SqlRepoComanda(prop.getURL());
+                    ArrayList<Produs> produse = repProdus.getList();
+                    repComanda = new SqlRepoComanda(prop.getURL(), produse);
                     break;
                 default:
                     throw new Exception("Invalid repository type!");

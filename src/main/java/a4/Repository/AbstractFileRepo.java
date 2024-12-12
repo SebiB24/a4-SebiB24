@@ -29,6 +29,12 @@ public abstract class AbstractFileRepo<T extends Entitate> extends Repository<T>
         saveFile();
     }
 
+    @Override
+    public void Act(T elem) throws RepositoryException {
+        super.Act(elem);
+        saveFile();
+    }
+
     protected abstract void saveFile() throws RepositoryException;
 
     protected abstract void loadFile() throws RepositoryException, ParseException;

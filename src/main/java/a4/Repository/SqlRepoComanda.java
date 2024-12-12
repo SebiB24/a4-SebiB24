@@ -2,6 +2,7 @@ package a4.Repository;
 
 import a4.Domain.Comanda;
 import a4.Domain.Produs;
+import a4.Domain.ProdusFactory;
 import com.github.javafaker.Faker;
 import org.sqlite.SQLiteDataSource;
 
@@ -14,9 +15,11 @@ import java.util.Date;
 public class SqlRepoComanda extends Repository<Comanda> {
     protected String URL;
     protected Connection conn = null;
+    protected ArrayList<Produs> produse;
 
-    public SqlRepoComanda(String URL) throws RepositoryException{
+    public SqlRepoComanda(String URL, ArrayList<Produs> produse) throws RepositoryException{
         this.URL = URL;
+        this.produse = produse;
         openConnection();
         createSchema();
         initTables();
@@ -46,12 +49,13 @@ public class SqlRepoComanda extends Repository<Comanda> {
     protected void createSchema() {
         try {
             try (final Statement stmt = conn.createStatement()) {
-                stmt.executeUpdate("CREATE TABLE IF NOT EXISTS comenzi(id int, data_livrare varchar(20));");
+                stmt.executeUpdate("CREATE TABLE IF NOT EXISTS comenzi(id int, data_livrare varchar(20), lista_produse varchar(20));");
             }
         } catch (SQLException e) {
             System.err.println("[ERROR] createSchema : " + e.getMessage());
         }
     }
+
 
     protected void initTables() {
         Faker faker = new Faker();
@@ -62,10 +66,12 @@ public class SqlRepoComanda extends Repository<Comanda> {
                 statement1.executeQuery().next();
                 if (statement1.executeQuery().getInt(1) == 0)
                     for (int i = 0; i < 50; i++) {
-                        try (PreparedStatement statement = conn.prepareStatement("INSERT INTO comenzi VALUES (?, ?)")) {
+                        try (PreparedStatement statement = conn.prepareStatement("INSERT INTO comenzi VALUES (?, ?, ?)")) {
                             statement.setInt(1, i);
                             Date data = faker.date().past(1000, java.util.concurrent.TimeUnit.DAYS);
                             statement.setString(2, formatter.format(data));
+                            String IDs = produse.getFirst().getId() + "," + produse.getLast().getId();
+                            statement.setString(3, IDs);
                             statement.executeUpdate();
                         }
                     }
@@ -87,9 +93,16 @@ public class SqlRepoComanda extends Repository<Comanda> {
     public void add(Comanda c) throws RepositoryException{
         super.add(c);
         try {
-            try (PreparedStatement statement = conn.prepareStatement("INSERT INTO comenzi VALUES(?, ?)")) {
+            try (PreparedStatement statement = conn.prepareStatement("INSERT INTO comenzi VALUES(?, ?, ?)")) {
                 statement.setInt(1, c.getId());
                 statement.setString(2, c.getData_livrare());
+                ArrayList<Produs> p = c.getProduse();
+                String IDs = new String();
+                for(Produs prod : p) {
+                    IDs = IDs + prod.getId() + ",";
+                }
+                IDs = IDs.substring(0, IDs.length() - 1);
+                statement.setString(3, IDs);
                 statement.executeUpdate();
             }
         } catch (SQLException e) {
@@ -115,10 +128,16 @@ public class SqlRepoComanda extends Repository<Comanda> {
         super.Act(c);
         try {
             try (PreparedStatement statement = conn.prepareStatement(
-                    "UPDATE comenzi SET data_livrare = ? WHERE id = ?")) {
+                    "UPDATE comenzi SET data_livrare = ?, lista_produse = ? WHERE id = ?")) {
                 statement.setString(1, c.getData_livrare());
                 statement.setInt(2, c.getId());
-
+                ArrayList<Produs> p = c.getProduse();
+                String IDs = new String();
+                for(Produs prod : p) {
+                    IDs = IDs + prod.getId() + ",";
+                }
+                IDs = IDs.substring(0, IDs.length() - 1);
+                statement.setString(3, IDs);
                 statement.executeUpdate();
             }
         } catch (SQLException e) {
@@ -133,7 +152,19 @@ public class SqlRepoComanda extends Repository<Comanda> {
         try {
             try (PreparedStatement statement = conn.prepareStatement("SELECT * from comenzi"); ResultSet rs = statement.executeQuery();) {
                 while (rs.next()) {
-                    Comanda c = new Comanda(rs.getInt("id"), rs.getString("data_livrare"));
+                    ArrayList<Produs> p = new ArrayList<>();
+                    String[] IDs = rs.getString("lista_produse").split(",");
+
+                    for(Produs prod: produse){
+                        for(String id: IDs){
+                            if(prod.getId() == Integer.parseInt(id)){
+                                    p.add(prod);
+                            }
+
+                        }
+                    }
+
+                    Comanda c = new Comanda(rs.getInt("id"), rs.getString("data_livrare"), p);
                     comenzi.add(c);
                 }
             }
