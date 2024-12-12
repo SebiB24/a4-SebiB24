@@ -3,8 +3,12 @@ import a4.Domain.Comanda;
 import a4.Domain.Produs;
 import a4.Service.Service;
 
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
+import java.util.Set;
+
 public class UI {
     private Service Service;
 
@@ -107,6 +111,28 @@ public class UI {
         Service.ActCom(id, data, nrProd, p);
     }
 
+    private void NrProduseCategorie(){
+        List<String> categori = Service.GetCategories();
+        for(String categorie: categori){
+            System.out.println(categorie + ": " + Service.NrProduseDeCategorie(categorie));
+        }
+    }
+
+    private void ProfitLuniAn() throws ParseException {
+        Set<Integer> luni = Service.GetLuniAn();
+        for(int luna : luni){
+            System.out.println("Luna: " + luna + ": Numar comenzi: " + Service.GetNrComenziLuna(luna)
+                    + " Pret total: " + Service.GetPretTotalLuna(luna));
+        }
+    }
+
+    private void AfisProdSort(){
+        ArrayList<Produs> list = Service.GetProdusSortat();
+        for(Produs produs: list){
+            System.out.println(produs.toString());
+        }
+    }
+
     public void program(){
         System.out.println("MENIU");
         System.out.println("1.Adauga produs");
@@ -117,6 +143,9 @@ public class UI {
         System.out.println("6.Afiseaza comenzi");
         System.out.println("7.Sterge comanda dupa ID");
         System.out.println("8.Actualizare comanda");
+        System.out.println("9.Afiseaza Categori cu Numar de Produse comandate");
+        System.out.println("10.Cele mai profitabile luni ale anului");
+        System.out.println("11.Lista produse sortata descrescator dupa incasar");
 
         boolean run = true;
         while(run) {
@@ -150,6 +179,15 @@ public class UI {
                         break;
                     case 8:
                         ActCom();
+                        break;
+                    case 9:
+                        NrProduseCategorie();
+                        break;
+                    case 10:
+                        ProfitLuniAn();
+                        break;
+                    case 11:
+                        AfisProdSort();
                         break;
                     case 0:
                         run = false;

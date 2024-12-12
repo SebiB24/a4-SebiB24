@@ -10,6 +10,12 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
 public class MagazinElectronice extends Application {
 
     private Service service = Main.service;
@@ -32,19 +38,28 @@ public class MagazinElectronice extends Application {
         deleteProdButton.setOnAction(e -> showDeleteProdDialog());
         updateProdButton.setOnAction(e -> showUpdateProdDialog());
 
-        Button addComButton = new Button("Adaugă Comandă");
-        Button displayComButton = new Button("Afișează Comenzi");
-        Button deleteComButton = new Button("Șterge Comandă");
-        Button updateComButton = new Button("Actualizează Comandă");
+        Button addComButton = new Button("Adauga Comanda");
+        Button displayComButton = new Button("Afiseaza Comenzi");
+        Button deleteComButton = new Button("Sterge Comanda");
+        Button updateComButton = new Button("Actualizeaza Comanda");
 
         addComButton.setOnAction(e -> showAddComDialog());
         displayComButton.setOnAction(e -> showOrderList(primaryStage));
         deleteComButton.setOnAction(e -> showDeleteComDialog());
         updateComButton.setOnAction(e -> showUpdateComDialog());
 
+        Button nrProdCategorieButton = new Button("Afiseaza Categori cu Numar de Produse comandate");
+        Button profitLuniButton = new Button("Afiseaza Cele mai profitabile luni ale anului");
+        Button dysplayProdSortButton = new Button("Afiseaza Lista produse sortata descrescator dupa incasar");
+
+        nrProdCategorieButton.setOnAction(e -> showProdCategorie(primaryStage));
+        profitLuniButton.setOnAction(e -> showProfitLuniAn(primaryStage));
+        dysplayProdSortButton.setOnAction(e -> showProductListSort(primaryStage));
+
         root.getChildren().addAll(titleLabel,
                 new Label("Produse:"), addProdButton, displayProdButton, deleteProdButton, updateProdButton,
-                new Label("Comenzi:"), addComButton, displayComButton, deleteComButton, updateComButton);
+                new Label("Comenzi:"), addComButton, displayComButton, deleteComButton, updateComButton,
+                new Label("Rapoarte:"), nrProdCategorieButton, profitLuniButton, dysplayProdSortButton);
 
         Scene scene = new Scene(root, 400, 500);
         primaryStage.setTitle("Gestionare Produse și Comenzi");
@@ -115,6 +130,93 @@ public class MagazinElectronice extends Application {
 
         try {
             tableView.getItems().addAll(service.GetProduse());
+        } catch (Exception ex) {
+            showErrorDialog("Eroare la încărcarea produselor: " + ex.getMessage());
+        }
+
+        VBox layout = new VBox(tableView);
+        Scene scene = new Scene(layout, 400, 300);
+
+        listStage.setScene(scene);
+        listStage.show();
+    }
+
+    private void showProdCategorie(Stage primaryStage) {
+        Stage nrProduseStage = new Stage();
+        nrProduseStage.setTitle("Numărul de Produse pe Categorie");
+
+        VBox layout = new VBox();
+        layout.setSpacing(10);
+
+        try {
+            List<String> categorii = service.GetCategories();
+            for (String categorie : categorii) {
+                int nrProduse = service.NrProduseDeCategorie(categorie);
+                Label label = new Label(categorie + ": " + nrProduse);
+                layout.getChildren().add(label);
+            }
+        } catch (Exception ex) {
+            Label errorLabel = new Label("Eroare la încărcarea datelor: " + ex.getMessage());
+            layout.getChildren().add(errorLabel);
+        }
+
+        Scene scene = new Scene(layout, 300, 200);
+
+        nrProduseStage.setScene(scene);
+        nrProduseStage.show();
+    }
+
+
+    private void showProfitLuniAn(Stage primaryStage) {
+        Stage profitLuniStage = new Stage();
+        profitLuniStage.setTitle("Profit pe Luni în An");
+
+        VBox layout = new VBox();
+        layout.setSpacing(10);
+
+        try {
+            Set<Integer> luni = service.GetLuniAn();
+            for (int luna : luni) {
+                int nrComenzi = service.GetNrComenziLuna(luna);
+                double pretTotal = service.GetPretTotalLuna(luna);
+                Label label = new Label("Luna: " + luna + ", Număr comenzi: " + nrComenzi + ", Preț total: " + pretTotal);
+                layout.getChildren().add(label);
+            }
+        } catch (Exception ex) {
+            Label errorLabel = new Label("Eroare la încărcarea datelor: " + ex.getMessage());
+            layout.getChildren().add(errorLabel);
+        }
+
+        Scene scene = new Scene(layout, 400, 300);
+
+        profitLuniStage.setScene(scene);
+        profitLuniStage.show();
+    }
+
+
+
+    private void showProductListSort(Stage primaryStage) {
+        Stage listStage = new Stage();
+        listStage.setTitle("Lista Produse Sortate dupa Incasari");
+
+        TableView<Produs> tableView = new TableView<>();
+
+        TableColumn<Produs, Integer> idColumn = new TableColumn<>("ID");
+        idColumn.setCellValueFactory(cellData -> new javafx.beans.property.SimpleObjectProperty<>(cellData.getValue().getId()));
+
+        TableColumn<Produs, String> categorieColumn = new TableColumn<>("Categorie");
+        categorieColumn.setCellValueFactory(cellData -> new javafx.beans.property.SimpleObjectProperty<>(cellData.getValue().getCategorie()));
+
+        TableColumn<Produs, String> numeColumn = new TableColumn<>("Nume");
+        numeColumn.setCellValueFactory(cellData -> new javafx.beans.property.SimpleObjectProperty<>(cellData.getValue().getNume()));
+
+        TableColumn<Produs, Integer> pretColumn = new TableColumn<>("Preț");
+        pretColumn.setCellValueFactory(cellData -> new javafx.beans.property.SimpleObjectProperty<>(cellData.getValue().getPret()));
+
+        tableView.getColumns().addAll(idColumn, categorieColumn, numeColumn, pretColumn);
+
+        try {
+            tableView.getItems().addAll(service.GetProdusSortat());
         } catch (Exception ex) {
             showErrorDialog("Eroare la încărcarea produselor: " + ex.getMessage());
         }
@@ -341,6 +443,28 @@ public class MagazinElectronice extends Application {
         Scene scene = new Scene(layout, 300, 300);
         dialog.setScene(scene);
         dialog.show();
+    }
+
+    private void NrProduseCategorie() {
+        List<String> categori = service.GetCategories();
+        for (String categorie : categori) {
+            System.out.println(categorie + ": " + service.NrProduseDeCategorie(categorie));
+        }
+    }
+
+    private void ProfitLuniAn() throws ParseException {
+        Set<Integer> luni = service.GetLuniAn();
+        for (int luna : luni) {
+            System.out.println("Luna: " + luna + ": Numar comenzi: " + service.GetNrComenziLuna(luna)
+                    + " Pret total: " + service.GetPretTotalLuna(luna));
+        }
+    }
+
+    private void AfisProdSort() {
+        ArrayList<Produs> list = service.GetProdusSortat();
+        for (Produs produs : list) {
+            System.out.println(produs.toString());
+        }
     }
 
     private void showErrorDialog(String message) {

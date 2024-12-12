@@ -1,4 +1,4 @@
-2,Telefoane,IPhone,4000
-3,Electrocasnice,Masina de spalat,3000
-4,Televizor,Philips,2500
-5,caine,bun,60
+2,Telefoane,IPhone,2500
+3,Electrocasnice,Masina de spalat,60
+4,Televizor,Philips,4000
+5,Telefoane,bun,3000

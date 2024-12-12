@@ -3,7 +3,11 @@ import a4.Domain.Comanda;
 import a4.Domain.Produs;
 import a4.Repository.Repository;
 
-import java.util.ArrayList;
+import java.text.ParseException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Service {
     private Repository<Comanda> repoC;
@@ -57,5 +61,75 @@ public class Service {
         }
         Comanda comanda = new Comanda(id, data, produse);
         repoC.Act(comanda);
+    }
+
+    public List<String> GetCategories(){
+        List<String> categori = repoP.getList().stream()
+                .map(Produs::getCategorie)
+                .distinct()
+                .collect(Collectors.toList());
+        return categori;
+    }
+
+    public int NrProduseDeCategorie(String categorie){
+        ArrayList<Comanda> comenzi = repoC.getList();
+        return comenzi.stream()
+                .flatMap(comanda -> comanda.getProduse().stream())
+                .filter(produs -> produs.getCategorie().equals(categorie))
+                .mapToInt(produs -> 1)
+                .sum();
+    }
+
+    public Set<Integer> GetLuniAn() throws ParseException {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        List<Comanda> comenzi = repoC.getList();
+
+        return comenzi.stream()
+                .map(Comanda::getData_livrare)
+                .map(data -> LocalDate.parse(data, formatter))
+                .map(LocalDate::getMonthValue)
+                .collect(Collectors.toSet());
+    }
+
+    public int GetNrComenziLuna(int luna){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        List<Comanda> comenzi = repoC.getList();
+
+        return (int) comenzi.stream()
+                .map(Comanda::getData_livrare)
+                .map(data -> LocalDate.parse(data, formatter))
+                .filter(date -> date.getMonthValue() == luna)
+                .count();
+    }
+
+    public int GetPretTotalLuna(int luna){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        ArrayList<Comanda> comenzi = repoC.getList();
+
+        return comenzi.stream()
+                .filter(comanda -> {
+                    LocalDate date = LocalDate.parse(comanda.getData_livrare(), formatter);
+                    return date.getMonthValue() == luna;
+                })
+                .flatMap(comanda -> comanda.getProduse().stream())
+                .mapToInt(Produs::getPret)
+                .sum();
+    }
+
+    public int IncasariProdus(Produs produs){
+        List<Comanda> comenzi = repoC.getList();
+
+        // Use streams to count occurrences of the product and calculate total revenue
+        return comenzi.stream()
+                .flatMap(comanda -> comanda.getProduse().stream())
+                .filter(p -> p.getId() == produs.getId())
+                .mapToInt(p -> produs.getPret())
+                .sum();
+    }
+
+    public ArrayList<Produs> GetProdusSortat(){
+        ArrayList<Produs> produse = repoP.getList();
+        produse.sort((p1, p2) -> Integer.compare(IncasariProdus(p2), IncasariProdus(p1)));
+        return produse;
     }
 }

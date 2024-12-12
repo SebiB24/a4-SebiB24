@@ -12,7 +12,8 @@ import a4.config.Properties;
 TODO
 - SQL la comenzi lista de produse
 - Design visual ui
-- cerinte stream
+- adauga functionalitate 9, 10 in VI
+
  */
 
 public class Main {
@@ -49,8 +50,8 @@ public class Main {
             service = new Service(repComanda, repProdus);
             ui = new UI(service);
 
-            //MagazinElectronice.launch(MagazinElectronice.class, args);
-            ui.program();
+            MagazinElectronice.launch(MagazinElectronice.class, args);
+            //ui.program();
 
         }
         catch (Exception e) {
