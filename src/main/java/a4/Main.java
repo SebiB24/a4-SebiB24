@@ -13,7 +13,6 @@ import java.util.ArrayList;
 /*
 TODO
 - Design visual ui
-
  */
 
 public class Main {
