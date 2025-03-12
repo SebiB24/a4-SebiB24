@@ -1,5 +1,6 @@
 package a4;
 
+import a4.Domain.Comanda;
 import a4.Domain.Produs;
 import a4.Service.Service;
 import javafx.application.Application;
@@ -14,9 +15,10 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+
+import java.util.ArrayList;
 
 public class MagazinElectronice extends Application {
 
@@ -25,24 +27,22 @@ public class MagazinElectronice extends Application {
     // Obiect = "Produse"/"Comenzi" // determina obiectul actual de lucru
     private String Obiect = "Produse";
 
+    private String getOtherObject(String obj){
+        if(obj.equals("Produse")){
+            return "Comenzi";
+        }
+        return "Produse";
+    }
+
     @Override
     public void start(Stage primaryStage) {
 
-        HBox mainBox = new HBox();
+/// COMENZI BOX ===================================================================================================================
+        HBox ProduseBox = new HBox();
 
         HBox leftSideBox = new HBox();
 
         ObservableList<Produs> ProduseList = FXCollections.observableArrayList(service.GetProduse());
-
-        /// Crearea LISTA pentru afisarea datelor
-
-        ListView<Produs> ProduseListView = new ListView<>();
-        ProduseListView.setItems(ProduseList);
-
-        ProduseListView.setMinWidth(275);
-        ProduseListView.setMaxWidth(Double.MAX_VALUE);
-        HBox.setHgrow(ProduseListView, Priority.ALWAYS);
-
 
         /// Creare TABEL pentru afisarea datelor
         /// !!! ADAUGA (opens Domain to javafx.base;) IN (module-info.java) !!!!!!
@@ -69,10 +69,8 @@ public class MagazinElectronice extends Application {
         ProdusTable.getColumns().add(pretColumn);
         ProdusTable.getColumns().add(categorieColumn);
 
-
-        //creem o lista de musicians care se vor afisa in tabel
         ProdusTable.setItems(ProduseList);
-        ProdusTable.setMaxWidth(300);
+        ProdusTable.setMinWidth(500);
 
         /// Adaugare Tabel/Lista in LBox
 
@@ -81,10 +79,13 @@ public class MagazinElectronice extends Application {
 
         /// Adaugare LBox in MBox
 
-        mainBox.getChildren().add(leftSideBox);
+        ProduseBox.getChildren().add(leftSideBox);
 
+        VBox RightBox = new VBox();
 
-        VBox CenterBox = new VBox();
+        Button objectButton = new Button(getOtherObject(Obiect));
+        objectButton.setMaxWidth(Double.MAX_VALUE);
+        RightBox.getChildren().add(objectButton);
 
         GridPane labelsAndFieldsPane = new GridPane();
         labelsAndFieldsPane.setVgap(3.5);
@@ -107,7 +108,7 @@ public class MagazinElectronice extends Application {
         labelsAndFieldsPane.add(categorieLable, 0, 3);
         labelsAndFieldsPane.add(categorieTextField, 1, 3);
 
-        CenterBox.getChildren().add(labelsAndFieldsPane);
+        RightBox.getChildren().add(labelsAndFieldsPane);
 
         //new HBox pentru butoane
         HBox buttonBox = new HBox();
@@ -122,36 +123,95 @@ public class MagazinElectronice extends Application {
         buttonBox.setSpacing(10);
 
 
-        CenterBox.getChildren().add(buttonBox);
+        RightBox.getChildren().add(buttonBox);
 
-        CenterBox.setSpacing(15);
-        CenterBox.setPadding(new Insets(10, 10, 10, 10));
+        RightBox.setSpacing(15);
+        RightBox.setPadding(new Insets(10, 10, 10, 10));
 
-        mainBox.getChildren().add(CenterBox);
+        ProduseBox.getChildren().add(RightBox);
 
-        VBox RightSideBox = new VBox();
-        RightSideBox.setPadding(new Insets(10, 10, 10, 10));
-        RightSideBox.setSpacing(5);
+/// COMENZI BOX ===================================================================================================================
+        HBox ComenziBox = new HBox();
 
-        TextField searchField = new TextField();
-        Button searchButton = new Button("Search");
-        Button resetButton = new Button("Reset");
-        searchButton.setMaxWidth(Double.MAX_VALUE);
-        resetButton.setMaxWidth(Double.MAX_VALUE);
+        HBox clLeftSideBox = new HBox();
 
-        RightSideBox.getChildren().add(searchField);
-        RightSideBox.getChildren().add(searchButton);
-        RightSideBox.getChildren().add(resetButton);
+        ObservableList<Comanda> ComenziList = FXCollections.observableArrayList(service.GetComenzi());
 
-        TextField createField = new TextField();
-        Button createButton = new Button("Create List");
-        createButton.setMaxWidth(Double.MAX_VALUE);
+        /// Creare TABEL pentru afisarea datelor
+        /// !!! ADAUGA (opens Domain to javafx.base;) IN (module-info.java) !!!!!!
 
-        RightSideBox.getChildren().add(createField);
-        RightSideBox.getChildren().add(createButton);
+        TableView<Comanda> ComenziTable = new TableView<>();
+        //creem cate o coloana pe rand
+        //textul din paranteze este header-ul
+        TableColumn<Comanda, Integer> cIdColumn = new TableColumn<>("ID");
+        TableColumn<Comanda, String> dataColumn = new TableColumn<>("Data Livrare");
+        TableColumn<Comanda, ArrayList<Produs>> produseColumn = new TableColumn<>("Lista Produse");
 
-        mainBox.getChildren().add(RightSideBox);
+        //specificam cum se vor completa coloanele - ce camp dintr-un
+        //obiect Musician vine pe fiecare coloana
 
+        cIdColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
+        dataColumn.setCellValueFactory(new PropertyValueFactory<>("data_livrare"));
+        produseColumn.setCellValueFactory(new PropertyValueFactory<>("produse"));
+
+        //adaugam coloanele la tabel
+        ComenziTable.getColumns().add(cIdColumn);
+        ComenziTable.getColumns().add(dataColumn);
+        ComenziTable.getColumns().add(produseColumn);
+
+        ComenziTable.setItems(ComenziList);
+        ComenziTable.setMinWidth(500);
+
+        /// Adaugare Tabel/Lista in LBox
+        clLeftSideBox.getChildren().add(ComenziTable);
+        clLeftSideBox.setPadding(new Insets(10, 10, 10, 10));
+
+        /// Adaugare LBox in MBox
+        ProduseBox.getChildren().add(clLeftSideBox);
+
+        VBox cRightBox = new VBox();
+        cRightBox.getChildren().add(objectButton);
+
+        GridPane cLabelsAndFieldsPane = new GridPane();
+        cLabelsAndFieldsPane.setVgap(3.5);
+        cLabelsAndFieldsPane.setHgap(3.5);
+        Label cIdLabel = new Label("ID");
+        Label dataLabel = new Label("Data livrare");
+        Label produseLabel = new Label("Produse");
+        TextField cIdTextField = new TextField();
+        TextField dataTextField = new TextField();
+        TextField produseTextField = new TextField();
+
+        cLabelsAndFieldsPane.add(cIdLabel, 0, 0);
+        cLabelsAndFieldsPane.add(cIdTextField, 1, 0);
+        cLabelsAndFieldsPane.add(dataLabel, 0, 1);
+        cLabelsAndFieldsPane.add(dataTextField, 1, 1);
+        cLabelsAndFieldsPane.add(produseLabel, 0, 2);
+        cLabelsAndFieldsPane.add(produseTextField, 1, 2);
+
+        cRightBox.getChildren().add(cLabelsAndFieldsPane);
+
+        cRightBox.getChildren().add(buttonBox);
+
+        cRightBox.setSpacing(15);
+        cRightBox.setPadding(new Insets(10, 10, 10, 10));
+
+        ProduseBox.getChildren().add(cRightBox);
+
+        Scene produseScene = new Scene(ProduseBox, 750, 400);
+        Scene comenziScene = new Scene(ComenziBox, 750, 400);
+        primaryStage.setTitle("Magazin App");
+        primaryStage.setScene(produseScene);
+        primaryStage.show();
+
+/// BUTTON FUNCTIONS ===================================================================================================================
+        objectButton.setOnMouseClicked(new EventHandler<>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                Obiect = getOtherObject(Obiect);
+                objectButton.setText(getOtherObject(Obiect));
+            }
+        });
 
         addButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
@@ -159,8 +219,8 @@ public class MagazinElectronice extends Application {
 
                 try{
                     int id = Integer.parseInt(idTextField.getText());
-                    String nume = numeTextField.getText();
-                    int pret = Integer.parseInt(pretTextField.getText());
+                    String nume = dataTextField.getText();
+                    int pret = Integer.parseInt(produseTextField.getText());
                     String categorie = categorieTextField.getText();
                     service.AddProd(id, categorie, nume, pret);
                     ProduseList.setAll(service.GetProduse());
@@ -172,7 +232,43 @@ public class MagazinElectronice extends Application {
                     alert.show();
                 }
 
-                System.out.println("We pressed the add button.");
+            }
+        });
+
+        objectButton.setOnMouseClicked(new EventHandler<>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                Obiect = getOtherObject(Obiect);
+                objectButton.setText(getOtherObject(Obiect));
+
+                if(Obiect.equals("Produse")){
+                    primaryStage.setScene(produseScene);
+                }
+                else if(Obiect.equals("Comenzi")){
+                    primaryStage.setScene(comenziScene);
+                }
+            }
+        });
+
+        addButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+
+                try{
+                    int id = Integer.parseInt(idTextField.getText());
+                    String nume = dataTextField.getText();
+                    int pret = Integer.parseInt(produseTextField.getText());
+                    String categorie = categorieTextField.getText();
+                    service.AddProd(id, categorie, nume, pret);
+                    ProduseList.setAll(service.GetProduse());
+                }
+                catch (Exception e ){
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Eroare");
+                    alert.setContentText("A aparut o eroare: "+e.getMessage());
+                    alert.show();
+                }
+
             }
         });
 
@@ -190,7 +286,6 @@ public class MagazinElectronice extends Application {
                     alert.setContentText("A aparut o eroare: "+e.getMessage());
                     alert.show();
                 }
-                System.out.println("We pressed the delete button.");
             }
         });
 
@@ -199,8 +294,8 @@ public class MagazinElectronice extends Application {
             public void handle(MouseEvent mouseEvent) {
                 try{
                     int id = Integer.parseInt(idTextField.getText());
-                    String nume = numeTextField.getText();
-                    int pret = Integer.parseInt(pretTextField.getText());
+                    String nume = dataTextField.getText();
+                    int pret = Integer.parseInt(produseTextField.getText());
                     String categorie = categorieTextField.getText();
                     service.ActProd(id, categorie, nume, pret);
                     ProduseList.setAll(service.GetProduse());
@@ -211,7 +306,6 @@ public class MagazinElectronice extends Application {
                     alert.setContentText("A aparut o eroare: "+e.getMessage());
                     alert.show();
                 }
-                System.out.println("We pressed the update button.");
             }
         });
 
@@ -222,16 +316,24 @@ public class MagazinElectronice extends Application {
             public void handle(MouseEvent mouseEvent) {
                 Produs selectedProdus = (Produs) ProdusTable.getSelectionModel().getSelectedItem();
                 idTextField.setText(String.valueOf(selectedProdus.getId()));
-                numeTextField.setText(selectedProdus.getNume());
-                pretTextField.setText(String.valueOf(selectedProdus.getPret()));
+                dataTextField.setText(selectedProdus.getNume());
+                produseTextField.setText(String.valueOf(selectedProdus.getPret()));
                 categorieTextField.setText(selectedProdus.getCategorie());
             }
         });
 
-        Scene scene = new Scene(mainBox, 750, 400);
-        primaryStage.setTitle("Magazin App");
-        primaryStage.setScene(scene);
-        primaryStage.show();
+        ComenziTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+
+        ComenziTable.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                Comanda selctedComanda = (Comanda) ComenziTable.getSelectionModel().getSelectedItem();
+                cIdTextField.setText(String.valueOf(selctedComanda.getId()));
+                dataTextField.setText(selctedComanda.getData_livrare());
+                produseTextField.setText(String.valueOf(selctedComanda.getProduse()));
+            }
+        });
+
     }
 
 
