@@ -1,476 +1,239 @@
 package a4;
 
-import a4.Domain.Comanda;
 import a4.Domain.Produs;
-import a4.Repository.Repository;
 import a4.Service.Service;
 import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 public class MagazinElectronice extends Application {
 
     private Service service = Main.service;
 
+    // Obiect = "Produse"/"Comenzi" // determina obiectul actual de lucru
+    private String Obiect = "Produse";
+
     @Override
     public void start(Stage primaryStage) {
 
-        VBox root = new VBox(10);
-        root.setPadding(new Insets(10));
+        HBox mainBox = new HBox();
 
-        Label titleLabel = new Label("Gestionare Produse și Comenzi");
+        HBox leftSideBox = new HBox();
 
-        Button addProdButton = new Button("Adaugă Produs");
-        Button displayProdButton = new Button("Afișează Produse");
-        Button deleteProdButton = new Button("Șterge Produs");
-        Button updateProdButton = new Button("Actualizează Produs");
+        ObservableList<Produs> ProduseList = FXCollections.observableArrayList(service.GetProduse());
 
-        addProdButton.setOnAction(e -> showAddProdDialog());
-        displayProdButton.setOnAction(e -> showProductList(primaryStage));
-        deleteProdButton.setOnAction(e -> showDeleteProdDialog());
-        updateProdButton.setOnAction(e -> showUpdateProdDialog());
+        /// Crearea LISTA pentru afisarea datelor
 
-        Button addComButton = new Button("Adauga Comanda");
-        Button displayComButton = new Button("Afiseaza Comenzi");
-        Button deleteComButton = new Button("Sterge Comanda");
-        Button updateComButton = new Button("Actualizeaza Comanda");
+        ListView<Produs> ProduseListView = new ListView<>();
+        ProduseListView.setItems(ProduseList);
 
-        addComButton.setOnAction(e -> showAddComDialog());
-        displayComButton.setOnAction(e -> showOrderList(primaryStage));
-        deleteComButton.setOnAction(e -> showDeleteComDialog());
-        updateComButton.setOnAction(e -> showUpdateComDialog());
+        ProduseListView.setMinWidth(275);
+        ProduseListView.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(ProduseListView, Priority.ALWAYS);
 
-        Button nrProdCategorieButton = new Button("Afiseaza Categori cu Numar de Produse comandate");
-        Button profitLuniButton = new Button("Afiseaza Cele mai profitabile luni ale anului");
-        Button dysplayProdSortButton = new Button("Afiseaza Lista produse sortata descrescator dupa incasar");
 
-        nrProdCategorieButton.setOnAction(e -> showProdCategorie(primaryStage));
-        profitLuniButton.setOnAction(e -> showProfitLuniAn(primaryStage));
-        dysplayProdSortButton.setOnAction(e -> showProductListSort(primaryStage));
+        /// Creare TABEL pentru afisarea datelor
+        /// !!! ADAUGA (opens Domain to javafx.base;) IN (module-info.java) !!!!!!
 
-        root.getChildren().addAll(titleLabel,
-                new Label("Produse:"), addProdButton, displayProdButton, deleteProdButton, updateProdButton,
-                new Label("Comenzi:"), addComButton, displayComButton, deleteComButton, updateComButton,
-                new Label("Rapoarte:"), nrProdCategorieButton, profitLuniButton, dysplayProdSortButton);
+        TableView<Produs> ProdusTable = new TableView<>();
+        //creem cate o coloana pe rand
+        //textul din paranteze este header-ul
+        TableColumn<Produs, Integer> idColumn = new TableColumn<>("ID");
+        TableColumn<Produs, String> numeColumn = new TableColumn<>("Nume");
+        TableColumn<Produs, Integer> pretColumn = new TableColumn<>("Pret");
+        TableColumn<Produs, String> categorieColumn = new TableColumn<>("Categorie");
 
-        Scene scene = new Scene(root, 400, 500);
-        primaryStage.setTitle("Gestionare Produse și Comenzi");
+        //specificam cum se vor completa coloanele - ce camp dintr-un
+        //obiect Musician vine pe fiecare coloana
+
+        idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
+        numeColumn.setCellValueFactory(new PropertyValueFactory<>("nume"));
+        pretColumn.setCellValueFactory(new PropertyValueFactory<>("pret"));
+        categorieColumn.setCellValueFactory(new PropertyValueFactory<>("categorie"));
+
+        //adaugam coloanele la tabel
+        ProdusTable.getColumns().add(idColumn);
+        ProdusTable.getColumns().add(numeColumn);
+        ProdusTable.getColumns().add(pretColumn);
+        ProdusTable.getColumns().add(categorieColumn);
+
+
+        //creem o lista de musicians care se vor afisa in tabel
+        ProdusTable.setItems(ProduseList);
+        ProdusTable.setMaxWidth(300);
+
+        /// Adaugare Tabel/Lista in LBox
+
+        leftSideBox.getChildren().add(ProdusTable);
+        leftSideBox.setPadding(new Insets(10, 10, 10, 10));
+
+        /// Adaugare LBox in MBox
+
+        mainBox.getChildren().add(leftSideBox);
+
+
+        VBox CenterBox = new VBox();
+
+        GridPane labelsAndFieldsPane = new GridPane();
+        labelsAndFieldsPane.setVgap(3.5);
+        labelsAndFieldsPane.setHgap(3.5);
+        Label idLabel = new Label("ID");
+        Label numeLabel = new Label("Nume");
+        Label pretLabel = new Label("Pret");
+        Label categorieLable = new Label("Categorie");
+        TextField idTextField = new TextField();
+        TextField numeTextField = new TextField();
+        TextField pretTextField = new TextField();
+        TextField categorieTextField = new TextField();
+
+        labelsAndFieldsPane.add(idLabel, 0, 0);
+        labelsAndFieldsPane.add(idTextField, 1, 0);
+        labelsAndFieldsPane.add(numeLabel, 0, 1);
+        labelsAndFieldsPane.add(numeTextField, 1, 1);
+        labelsAndFieldsPane.add(pretLabel, 0, 2);
+        labelsAndFieldsPane.add(pretTextField, 1, 2);
+        labelsAndFieldsPane.add(categorieLable, 0, 3);
+        labelsAndFieldsPane.add(categorieTextField, 1, 3);
+
+        CenterBox.getChildren().add(labelsAndFieldsPane);
+
+        //new HBox pentru butoane
+        HBox buttonBox = new HBox();
+        Button addButton = new Button("Add");
+        Button deleteButton = new Button("Delete");
+        Button updateButton = new Button("Update");
+
+        buttonBox.getChildren().add(addButton);
+        buttonBox.getChildren().add(deleteButton);
+        buttonBox.getChildren().add(updateButton);
+        buttonBox.setAlignment(Pos.BASELINE_CENTER);
+        buttonBox.setSpacing(10);
+
+
+        CenterBox.getChildren().add(buttonBox);
+
+        CenterBox.setSpacing(15);
+        CenterBox.setPadding(new Insets(10, 10, 10, 10));
+
+        mainBox.getChildren().add(CenterBox);
+
+        VBox RightSideBox = new VBox();
+        RightSideBox.setPadding(new Insets(10, 10, 10, 10));
+        RightSideBox.setSpacing(5);
+
+        TextField searchField = new TextField();
+        Button searchButton = new Button("Search");
+        Button resetButton = new Button("Reset");
+        searchButton.setMaxWidth(Double.MAX_VALUE);
+        resetButton.setMaxWidth(Double.MAX_VALUE);
+
+        RightSideBox.getChildren().add(searchField);
+        RightSideBox.getChildren().add(searchButton);
+        RightSideBox.getChildren().add(resetButton);
+
+        TextField createField = new TextField();
+        Button createButton = new Button("Create List");
+        createButton.setMaxWidth(Double.MAX_VALUE);
+
+        RightSideBox.getChildren().add(createField);
+        RightSideBox.getChildren().add(createButton);
+
+        mainBox.getChildren().add(RightSideBox);
+
+
+        addButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+
+                try{
+                    int id = Integer.parseInt(idTextField.getText());
+                    String nume = numeTextField.getText();
+                    int pret = Integer.parseInt(pretTextField.getText());
+                    String categorie = categorieTextField.getText();
+                    service.AddProd(id, categorie, nume, pret);
+                    ProduseList.setAll(service.GetProduse());
+                }
+                catch (Exception e ){
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Eroare");
+                    alert.setContentText("A aparut o eroare: "+e.getMessage());
+                    alert.show();
+                }
+
+                System.out.println("We pressed the add button.");
+            }
+        });
+
+        deleteButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                try{
+                    int id = Integer.parseInt(idTextField.getText());
+                    service.StergeProd(id);
+                    ProduseList.setAll(service.GetProduse());
+                }
+                catch (Exception e ){
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Eroare");
+                    alert.setContentText("A aparut o eroare: "+e.getMessage());
+                    alert.show();
+                }
+                System.out.println("We pressed the delete button.");
+            }
+        });
+
+        updateButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                try{
+                    int id = Integer.parseInt(idTextField.getText());
+                    String nume = numeTextField.getText();
+                    int pret = Integer.parseInt(pretTextField.getText());
+                    String categorie = categorieTextField.getText();
+                    service.ActProd(id, categorie, nume, pret);
+                    ProduseList.setAll(service.GetProduse());
+                }
+                catch (Exception e ){
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Eroare");
+                    alert.setContentText("A aparut o eroare: "+e.getMessage());
+                    alert.show();
+                }
+                System.out.println("We pressed the update button.");
+            }
+        });
+
+        ProdusTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+
+        ProdusTable.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                Produs selectedProdus = (Produs) ProdusTable.getSelectionModel().getSelectedItem();
+                idTextField.setText(String.valueOf(selectedProdus.getId()));
+                numeTextField.setText(selectedProdus.getNume());
+                pretTextField.setText(String.valueOf(selectedProdus.getPret()));
+                categorieTextField.setText(selectedProdus.getCategorie());
+            }
+        });
+
+        Scene scene = new Scene(mainBox, 750, 400);
+        primaryStage.setTitle("Magazin App");
         primaryStage.setScene(scene);
         primaryStage.show();
     }
 
-    private void showAddProdDialog() {
-        Stage dialog = new Stage();
-        dialog.setTitle("Adaugă Produs");
-
-        VBox layout = new VBox(10);
-        layout.setPadding(new Insets(10));
-
-        TextField idField = new TextField();
-        idField.setPromptText("ID");
-
-        TextField categorieField = new TextField();
-        categorieField.setPromptText("Categorie");
-
-        TextField numeField = new TextField();
-        numeField.setPromptText("Nume");
-
-        TextField pretField = new TextField();
-        pretField.setPromptText("Preț");
-
-        Button saveButton = new Button("Salvează");
-        saveButton.setOnAction(e -> {
-            try {
-                int id = Integer.parseInt(idField.getText());
-                String categorie = categorieField.getText();
-                String nume = numeField.getText();
-                int pret = Integer.parseInt(pretField.getText());
-
-                service.AddProd(id, categorie, nume, pret);
-                dialog.close();
-            } catch (Exception ex) {
-                showErrorDialog("Eroare la adăugare produs: " + ex.getMessage());
-            }
-        });
-
-        layout.getChildren().addAll(idField, categorieField, numeField, pretField, saveButton);
-
-        Scene scene = new Scene(layout, 300, 200);
-        dialog.setScene(scene);
-        dialog.show();
-    }
-
-    private void showProductList(Stage primaryStage) {
-        Stage listStage = new Stage();
-        listStage.setTitle("Lista Produse");
-
-        TableView<Produs> tableView = new TableView<>();
-
-        TableColumn<Produs, Integer> idColumn = new TableColumn<>("ID");
-        idColumn.setCellValueFactory(cellData -> new javafx.beans.property.SimpleObjectProperty<>(cellData.getValue().getId()));
-
-        TableColumn<Produs, String> categorieColumn = new TableColumn<>("Categorie");
-        categorieColumn.setCellValueFactory(cellData -> new javafx.beans.property.SimpleObjectProperty<>(cellData.getValue().getCategorie()));
-
-        TableColumn<Produs, String> numeColumn = new TableColumn<>("Nume");
-        numeColumn.setCellValueFactory(cellData -> new javafx.beans.property.SimpleObjectProperty<>(cellData.getValue().getNume()));
-
-        TableColumn<Produs, Integer> pretColumn = new TableColumn<>("Preț");
-        pretColumn.setCellValueFactory(cellData -> new javafx.beans.property.SimpleObjectProperty<>(cellData.getValue().getPret()));
-
-        tableView.getColumns().addAll(idColumn, categorieColumn, numeColumn, pretColumn);
-
-        try {
-            tableView.getItems().addAll(service.GetProduse());
-        } catch (Exception ex) {
-            showErrorDialog("Eroare la încărcarea produselor: " + ex.getMessage());
-        }
-
-        VBox layout = new VBox(tableView);
-        Scene scene = new Scene(layout, 400, 300);
-
-        listStage.setScene(scene);
-        listStage.show();
-    }
-
-    private void showProdCategorie(Stage primaryStage) {
-        Stage nrProduseStage = new Stage();
-        nrProduseStage.setTitle("Numărul de Produse pe Categorie");
-
-        VBox layout = new VBox();
-        layout.setSpacing(10);
-
-        try {
-            List<String> categorii = service.GetCategories();
-            for (String categorie : categorii) {
-                int nrProduse = service.NrProduseDeCategorie(categorie);
-                Label label = new Label(categorie + ": " + nrProduse);
-                layout.getChildren().add(label);
-            }
-        } catch (Exception ex) {
-            Label errorLabel = new Label("Eroare la încărcarea datelor: " + ex.getMessage());
-            layout.getChildren().add(errorLabel);
-        }
-
-        Scene scene = new Scene(layout, 300, 200);
-
-        nrProduseStage.setScene(scene);
-        nrProduseStage.show();
-    }
-
-
-    private void showProfitLuniAn(Stage primaryStage) {
-        Stage profitLuniStage = new Stage();
-        profitLuniStage.setTitle("Profit pe Luni în An");
-
-        VBox layout = new VBox();
-        layout.setSpacing(10);
-
-        try {
-            Set<Integer> luni = service.GetLuniAn();
-            for (int luna : luni) {
-                int nrComenzi = service.GetNrComenziLuna(luna);
-                double pretTotal = service.GetPretTotalLuna(luna);
-                Label label = new Label("Luna: " + luna + ", Număr comenzi: " + nrComenzi + ", Preț total: " + pretTotal);
-                layout.getChildren().add(label);
-            }
-        } catch (Exception ex) {
-            Label errorLabel = new Label("Eroare la încărcarea datelor: " + ex.getMessage());
-            layout.getChildren().add(errorLabel);
-        }
-
-        Scene scene = new Scene(layout, 400, 300);
-
-        profitLuniStage.setScene(scene);
-        profitLuniStage.show();
-    }
-
-
-
-    private void showProductListSort(Stage primaryStage) {
-        Stage listStage = new Stage();
-        listStage.setTitle("Lista Produse Sortate dupa Incasari");
-
-        TableView<Produs> tableView = new TableView<>();
-
-        TableColumn<Produs, Integer> idColumn = new TableColumn<>("ID");
-        idColumn.setCellValueFactory(cellData -> new javafx.beans.property.SimpleObjectProperty<>(cellData.getValue().getId()));
-
-        TableColumn<Produs, String> categorieColumn = new TableColumn<>("Categorie");
-        categorieColumn.setCellValueFactory(cellData -> new javafx.beans.property.SimpleObjectProperty<>(cellData.getValue().getCategorie()));
-
-        TableColumn<Produs, String> numeColumn = new TableColumn<>("Nume");
-        numeColumn.setCellValueFactory(cellData -> new javafx.beans.property.SimpleObjectProperty<>(cellData.getValue().getNume()));
-
-        TableColumn<Produs, Integer> pretColumn = new TableColumn<>("Preț");
-        pretColumn.setCellValueFactory(cellData -> new javafx.beans.property.SimpleObjectProperty<>(cellData.getValue().getPret()));
-
-        tableView.getColumns().addAll(idColumn, categorieColumn, numeColumn, pretColumn);
-
-        try {
-            tableView.getItems().addAll(service.GetProdusSortat());
-        } catch (Exception ex) {
-            showErrorDialog("Eroare la încărcarea produselor: " + ex.getMessage());
-        }
-
-        VBox layout = new VBox(tableView);
-        Scene scene = new Scene(layout, 400, 300);
-
-        listStage.setScene(scene);
-        listStage.show();
-    }
-
-    private void showDeleteProdDialog() {
-        Stage dialog = new Stage();
-        dialog.setTitle("Șterge Produs");
-
-        VBox layout = new VBox(10);
-        layout.setPadding(new Insets(10));
-
-        TextField idField = new TextField();
-        idField.setPromptText("ID");
-
-        Button deleteButton = new Button("Șterge");
-        deleteButton.setOnAction(e -> {
-            try {
-                int id = Integer.parseInt(idField.getText());
-                service.StergeProd(id);
-                dialog.close();
-            } catch (Exception ex) {
-                showErrorDialog("Eroare la ștergerea produsului: " + ex.getMessage());
-            }
-        });
-
-        layout.getChildren().addAll(idField, deleteButton);
-
-        Scene scene = new Scene(layout, 300, 150);
-        dialog.setScene(scene);
-        dialog.show();
-    }
-
-    private void showUpdateProdDialog() {
-        Stage dialog = new Stage();
-        dialog.setTitle("Actualizează Produs");
-
-        VBox layout = new VBox(10);
-        layout.setPadding(new Insets(10));
-
-        TextField idField = new TextField();
-        idField.setPromptText("ID");
-
-        TextField categorieField = new TextField();
-        categorieField.setPromptText("Categorie Nouă");
-
-        TextField numeField = new TextField();
-        numeField.setPromptText("Nume Nou");
-
-        TextField pretField = new TextField();
-        pretField.setPromptText("Preț Nou");
-
-        Button updateButton = new Button("Actualizează");
-        updateButton.setOnAction(e -> {
-            try {
-                int id = Integer.parseInt(idField.getText());
-                String categorie = categorieField.getText();
-                String nume = numeField.getText();
-                int pret = Integer.parseInt(pretField.getText());
-
-                service.ActProd(id, categorie, nume, pret);
-                dialog.close();
-            } catch (Exception ex) {
-                showErrorDialog("Eroare la actualizare produs: " + ex.getMessage());
-            }
-        });
-
-        layout.getChildren().addAll(idField, categorieField, numeField, pretField, updateButton);
-
-        Scene scene = new Scene(layout, 300, 250);
-        dialog.setScene(scene);
-        dialog.show();
-    }
-
-    private void showAddComDialog() {
-        Stage dialog = new Stage();
-        dialog.setTitle("Adaugă Comandă");
-
-        VBox layout = new VBox(10);
-        layout.setPadding(new Insets(10));
-
-        TextField idField = new TextField();
-        idField.setPromptText("ID");
-
-        TextField dataField = new TextField();
-        dataField.setPromptText("Data");
-
-        TextField nrProdField = new TextField();
-        nrProdField.setPromptText("Număr Produse");
-
-        TextField prodIdsField = new TextField();
-        prodIdsField.setPromptText("ID-uri Produse (separate prin virgulă)");
-
-        Button saveButton = new Button("Salvează");
-        saveButton.setOnAction(e -> {
-            try {
-                int id = Integer.parseInt(idField.getText());
-                String data = dataField.getText();
-                int nrProd = Integer.parseInt(nrProdField.getText());
-                String[] prodIdsStr = prodIdsField.getText().split(",");
-                int[] prodIds = new int[prodIdsStr.length];
-                for (int i = 0; i < prodIdsStr.length; i++) {
-                    prodIds[i] = Integer.parseInt(prodIdsStr[i].trim());
-                }
-
-                service.AddCom(id, data, nrProd, prodIds);
-                dialog.close();
-            } catch (Exception ex) {
-                showErrorDialog("Eroare la adăugare comandă: " + ex.getMessage());
-            }
-        });
-
-        layout.getChildren().addAll(idField, dataField, nrProdField, prodIdsField, saveButton);
-
-        Scene scene = new Scene(layout, 300, 300);
-        dialog.setScene(scene);
-        dialog.show();
-    }
-
-    private void showOrderList(Stage primaryStage) {
-        Stage listStage = new Stage();
-        listStage.setTitle("Lista Comenzi");
-
-        TableView<Comanda> tableView = new TableView<>();
-
-        TableColumn<Comanda, Integer> idColumn = new TableColumn<>("ID");
-        idColumn.setCellValueFactory(cellData -> new javafx.beans.property.SimpleObjectProperty<>(cellData.getValue().getId()));
-
-        TableColumn<Comanda, String> dataColumn = new TableColumn<>("Data");
-        dataColumn.setCellValueFactory(cellData -> new javafx.beans.property.SimpleObjectProperty<>(cellData.getValue().getData_livrare()));
-
-        TableColumn<Comanda, String> produseColumn = new TableColumn<>("Produse");
-        produseColumn.setCellValueFactory(cellData -> new javafx.beans.property.SimpleObjectProperty<>(cellData.getValue().getProduse().toString()));
-
-        tableView.getColumns().addAll(idColumn, dataColumn, produseColumn);
-
-        try {
-            tableView.getItems().addAll(service.GetComenzi());
-        } catch (Exception ex) {
-            showErrorDialog("Eroare la încărcarea comenzilor: " + ex.getMessage());
-        }
-
-        VBox layout = new VBox(tableView);
-        Scene scene = new Scene(layout, 400, 300);
-
-        listStage.setScene(scene);
-        listStage.show();
-    }
-
-    private void showDeleteComDialog() {
-        Stage dialog = new Stage();
-        dialog.setTitle("Șterge Comandă");
-
-        VBox layout = new VBox(10);
-        layout.setPadding(new Insets(10));
-
-        TextField idField = new TextField();
-        idField.setPromptText("ID");
-
-        Button deleteButton = new Button("Șterge");
-        deleteButton.setOnAction(e -> {
-            try {
-                int id = Integer.parseInt(idField.getText());
-                service.StergeCom(id);
-                dialog.close();
-            } catch (Exception ex) {
-                showErrorDialog("Eroare la ștergerea comenzii: " + ex.getMessage());
-            }
-        });
-
-        layout.getChildren().addAll(idField, deleteButton);
-
-        Scene scene = new Scene(layout, 300, 150);
-        dialog.setScene(scene);
-        dialog.show();
-    }
-
-    private void showUpdateComDialog() {
-        Stage dialog = new Stage();
-        dialog.setTitle("Actualizează Comandă");
-
-        VBox layout = new VBox(10);
-        layout.setPadding(new Insets(10));
-
-        TextField idField = new TextField();
-        idField.setPromptText("ID");
-
-        TextField dataField = new TextField();
-        dataField.setPromptText("Data Nouă");
-
-        TextField nrProdField = new TextField();
-        nrProdField.setPromptText("Număr Produse");
-
-        TextField prodIdsField = new TextField();
-        prodIdsField.setPromptText("ID-uri Produse Noi (separate prin virgulă)");
-
-        Button updateButton = new Button("Actualizează");
-        updateButton.setOnAction(e -> {
-            try {
-                int id = Integer.parseInt(idField.getText());
-                String data = dataField.getText();
-                int nrProd = Integer.parseInt(nrProdField.getText());
-                String[] prodIdsStr = prodIdsField.getText().split(",");
-                int[] prodIds = new int[prodIdsStr.length];
-                for (int i = 0; i < prodIdsStr.length; i++) {
-                    prodIds[i] = Integer.parseInt(prodIdsStr[i].trim());
-                }
-
-                service.ActCom(id, data, nrProd, prodIds);
-                dialog.close();
-            } catch (Exception ex) {
-                showErrorDialog("Eroare la actualizare comandă: " + ex.getMessage());
-            }
-        });
-
-        layout.getChildren().addAll(idField, dataField, nrProdField, prodIdsField, updateButton);
-
-        Scene scene = new Scene(layout, 300, 300);
-        dialog.setScene(scene);
-        dialog.show();
-    }
-
-    private void NrProduseCategorie() {
-        List<String> categori = service.GetCategories();
-        for (String categorie : categori) {
-            System.out.println(categorie + ": " + service.NrProduseDeCategorie(categorie));
-        }
-    }
-
-    private void ProfitLuniAn() throws ParseException {
-        Set<Integer> luni = service.GetLuniAn();
-        for (int luna : luni) {
-            System.out.println("Luna: " + luna + ": Numar comenzi: " + service.GetNrComenziLuna(luna)
-                    + " Pret total: " + service.GetPretTotalLuna(luna));
-        }
-    }
-
-    private void AfisProdSort() {
-        ArrayList<Produs> list = service.GetProdusSortat();
-        for (Produs produs : list) {
-            System.out.println(produs.toString());
-        }
-    }
-
-    private void showErrorDialog(String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR, message);
-        alert.showAndWait();
-    }
 
     public static void main(String[] args) {
         launch(args);

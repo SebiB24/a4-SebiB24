@@ -8,6 +8,7 @@ module org.example.a4sebib24 {
     requires org.kordamp.bootstrapfx.core;
 
     opens a4 to javafx.fxml;
+    opens a4.Domain to javafx.base;
     exports a4;
 
     requires java.sql;

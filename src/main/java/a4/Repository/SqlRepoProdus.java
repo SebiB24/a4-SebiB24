@@ -1,13 +1,10 @@
 package a4.Repository;
 
-import a4.Domain.Comanda;
 import a4.Domain.Produs;
 import com.github.javafaker.Faker;
 import org.sqlite.SQLiteDataSource;
 
 import java.sql.*;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -89,6 +86,24 @@ public class SqlRepoProdus extends Repository<Produs> {
         }
     }
 
+    public ArrayList<Produs> getAll() {
+        ArrayList<Produs> produse = new ArrayList<>();
+
+        try {
+            try (PreparedStatement statement = conn.prepareStatement("SELECT * from produse"); ResultSet rs = statement.executeQuery();) {
+                while (rs.next()) {
+                    Produs p = new Produs(rs.getInt("id"), rs.getString("categorie")
+                            , rs.getString("nume"), rs.getInt("pret"));
+                    produse.add(p);
+                }
+            }
+        } catch (SQLException ex) {
+            System.err.println("[ERROR] getAll : " + ex.getMessage());
+        }
+
+        return produse;
+    }
+
     @Override
     public void add(Produs p) throws RepositoryException{
         super.add(p);
@@ -137,22 +152,4 @@ public class SqlRepoProdus extends Repository<Produs> {
 
     }
 
-
-    public ArrayList<Produs> getAll() {
-        ArrayList<Produs> produse = new ArrayList<>();
-
-        try {
-            try (PreparedStatement statement = conn.prepareStatement("SELECT * from produse"); ResultSet rs = statement.executeQuery();) {
-                while (rs.next()) {
-                    Produs p = new Produs(rs.getInt("id"), rs.getString("categorie")
-                            , rs.getString("nume"), rs.getInt("pret"));
-                    produse.add(p);
-                }
-            }
-        } catch (SQLException ex) {
-            System.err.println("[ERROR] getAll : " + ex.getMessage());
-        }
-
-        return produse;
-    }
 }
