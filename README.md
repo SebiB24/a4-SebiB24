@@ -33,6 +33,8 @@ Aceasta aplicație gestionează un magazin electronic, permițând utilizatorilo
 
 - Java
 - JavaFX
+- Streams
+- Random
 - SQLite
 
 ## Informații suplimentare
