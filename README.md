@@ -43,7 +43,10 @@ Această aplicație este un proiect demonstrativ și poate fi extinsă pentru a 
 
 ## Capturi de ecran din aplicatie
 
-![image](https://github.com/user-attachments/assets/752ff1a2-00be-4a5b-9f4b-97fefe51b662)
-![image](https://github.com/user-attachments/assets/0ee7b86c-3c1b-435f-8656-c62a1c7b0cb5)
+![image](https://github.com/user-attachments/assets/7500129b-8399-41f6-ac73-83ee9c41fb1b)
+
+![image](https://github.com/user-attachments/assets/a35ee491-fddb-4cb3-85c8-763cc04dfbc8)
+
+
 
 
