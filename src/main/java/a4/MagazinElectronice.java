@@ -19,20 +19,12 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 public class MagazinElectronice extends Application {
 
     private Service service = Main.service;
-
-    // Obiect = "Produse"/"Comenzi" // determina obiectul actual de lucru
-    private String Obiect = "Produse";
-
-    private String getOtherObject(String obj){
-        if(obj.equals("Produse")){
-            return "Comenzi";
-        }
-        return "Produse";
-    }
 
     @Override
     public void start(Stage primaryStage) {
@@ -107,8 +99,19 @@ public class MagazinElectronice extends Application {
         buttonBox.setAlignment(Pos.BASELINE_CENTER);
         buttonBox.setSpacing(10);
 
-
         RightBox.getChildren().add(buttonBox);
+
+        Button SpecialButton1 = new Button("Afis categorii cu nr produse comandate");
+        SpecialButton1.setMaxWidth(Double.MAX_VALUE);
+        RightBox.getChildren().add(SpecialButton1);
+
+        Button SpecialButton2 = new Button("Cele mai profitabile luni");
+        SpecialButton2.setMaxWidth(Double.MAX_VALUE);
+        RightBox.getChildren().add(SpecialButton2);
+
+        Button SpecialButton3 = new Button("Produse sortate dupa incasari");
+        SpecialButton3.setMaxWidth(Double.MAX_VALUE);
+        RightBox.getChildren().add(SpecialButton3);
 
         RightBox.setSpacing(15);
         RightBox.setPadding(new Insets(10, 10, 10, 10));
@@ -186,6 +189,29 @@ public class MagazinElectronice extends Application {
             }
         });
 
+        SpecialButton1.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                SpecialFunction1();
+            }
+        });
+
+        SpecialButton2.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                SpecialFunction2();
+            }
+        });
+
+        SpecialButton3.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                ObservableList<Produs> ProduseSortateList = FXCollections.observableArrayList(service.GetProdusSortat());
+                    table.setItems(ProduseSortateList);
+            }
+        });
+
+
         root.getChildren().addAll(table, RightBox);
         return new Scene(root, 750, 400);
     }
@@ -249,8 +275,17 @@ public class MagazinElectronice extends Application {
 
         RightBox.getChildren().add(buttonBox);
 
+        Button SpecialButton1 = new Button("Afis categorii cu nr produse comandate");
+        SpecialButton1.setMaxWidth(Double.MAX_VALUE);
+        RightBox.getChildren().add(SpecialButton1);
+
+        Button SpecialButton2 = new Button("Cele mai profitabile luni");
+        SpecialButton2.setMaxWidth(Double.MAX_VALUE);
+        RightBox.getChildren().add(SpecialButton2);
+
         RightBox.setSpacing(15);
         RightBox.setPadding(new Insets(10, 10, 10, 10));
+
         ///BUTTON FUNCTIONS ------------------------------------------------------------------------------------
         table.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 
@@ -281,8 +316,76 @@ public class MagazinElectronice extends Application {
             }
         });
 
+        SpecialButton1.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                SpecialFunction1();
+            }
+        });
+
+        SpecialButton2.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                SpecialFunction2();
+            }
+        });
+
         root.getChildren().addAll(table, RightBox);
         return new Scene(root, 750, 400);
+    }
+
+    private void SpecialFunction1(){
+        Stage nrProduseStage = new Stage();
+        nrProduseStage.setTitle("Numărul de Produse pe Categorie");
+
+        VBox layout = new VBox();
+        layout.setSpacing(10);
+
+        try {
+            List<String> categorii = service.GetCategories();
+            for (String categorie : categorii) {
+                int nrProduse = service.NrProduseDeCategorie(categorie);
+                Label label = new Label(categorie + ": " + nrProduse);
+                layout.getChildren().add(label);
+            }
+        } catch (Exception ex) {
+            Label errorLabel = new Label("Eroare la încărcarea datelor: " + ex.getMessage());
+            layout.getChildren().add(errorLabel);
+        }
+
+        layout.setPadding(new Insets(10, 10, 10, 10));
+
+        Scene scene = new Scene(layout, 150, 400);
+
+        nrProduseStage.setScene(scene);
+        nrProduseStage.show();
+    }
+
+    private void SpecialFunction2(){
+        Stage profitLuniStage = new Stage();
+        profitLuniStage.setTitle("Profit pe Luni în An");
+
+        VBox layout = new VBox();
+        layout.setSpacing(10);
+
+        try {
+            Set<Integer> luni = service.GetLuniAn();
+            for (int luna : luni) {
+                int nrComenzi = service.GetNrComenziLuna(luna);
+                double pretTotal = service.GetPretTotalLuna(luna);
+                Label label = new Label("Luna: " + luna + ", Număr comenzi: " + nrComenzi + ", Preț total: " + pretTotal);
+                layout.getChildren().add(label);
+            }
+        } catch (Exception ex) {
+            Label errorLabel = new Label("Eroare la încărcarea datelor: " + ex.getMessage());
+            layout.getChildren().add(errorLabel);
+        }
+
+        Scene scene = new Scene(layout, 300, 350);
+        layout.setPadding(new Insets(10, 10, 10, 10));
+
+        profitLuniStage.setScene(scene);
+        profitLuniStage.show();
     }
 
     public static void main(String[] args) {
