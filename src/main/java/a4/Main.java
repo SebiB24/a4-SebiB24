@@ -10,10 +10,6 @@ import a4.UI.UI;
 import a4.config.Properties;
 
 import java.util.ArrayList;
-/*
-TODO
-- Design visual ui
- */
 
 public class Main {
 

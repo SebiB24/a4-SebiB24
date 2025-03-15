@@ -130,14 +130,14 @@ public class SqlRepoComanda extends Repository<Comanda> {
             try (PreparedStatement statement = conn.prepareStatement(
                     "UPDATE comenzi SET data_livrare = ?, lista_produse = ? WHERE id = ?")) {
                 statement.setString(1, c.getData_livrare());
-                statement.setInt(2, c.getId());
                 ArrayList<Produs> p = c.getProduse();
                 String IDs = new String();
                 for(Produs prod : p) {
                     IDs = IDs + prod.getId() + ",";
                 }
                 IDs = IDs.substring(0, IDs.length() - 1);
-                statement.setString(3, IDs);
+                statement.setString(2, IDs);
+                statement.setInt(3, c.getId());
                 statement.executeUpdate();
             }
         } catch (SQLException e) {

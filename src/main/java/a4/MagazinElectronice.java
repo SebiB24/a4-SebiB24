@@ -114,6 +114,7 @@ public class MagazinElectronice extends Application {
         SpecialButton3.setMaxWidth(Double.MAX_VALUE);
         RightBox.getChildren().add(SpecialButton3);
 
+        RightBox.setMinWidth(250);
         RightBox.setSpacing(15);
         RightBox.setPadding(new Insets(10, 10, 10, 10));
 
@@ -224,6 +225,8 @@ public class MagazinElectronice extends Application {
         ObservableList<Comanda> ComenziList = FXCollections.observableArrayList(service.GetComenzi());
 
         TableView<Comanda> table = new TableView<>();
+        table.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
+
         TableColumn<Comanda, Integer> idColumn = new TableColumn<>("ID");
         TableColumn<Comanda, String> dataColumn = new TableColumn<>("Data Livrare");
         TableColumn<Comanda, ArrayList<Produs>> produseColumn = new TableColumn<>("Lista Produse");
@@ -232,9 +235,13 @@ public class MagazinElectronice extends Application {
         dataColumn.setCellValueFactory(new PropertyValueFactory<>("data_livrare"));
         produseColumn.setCellValueFactory(new PropertyValueFactory<>("produse"));
 
+        produseColumn.setMinWidth(300);
+        produseColumn.setPrefWidth(400);
+
+
         table.getColumns().addAll(idColumn, dataColumn, produseColumn);
         table.setItems(ComenziList);
-        table.setMinWidth(500);
+        table.setMinWidth(450);
 
 
         ///Right Box -------------------------------------------------------------------------------
@@ -284,6 +291,7 @@ public class MagazinElectronice extends Application {
         SpecialButton2.setMaxWidth(Double.MAX_VALUE);
         RightBox.getChildren().add(SpecialButton2);
 
+        RightBox.setMinWidth(250);
         RightBox.setSpacing(15);
         RightBox.setPadding(new Insets(10, 10, 10, 10));
 
@@ -328,6 +336,26 @@ public class MagazinElectronice extends Application {
                 try{
                     int id = Integer.parseInt(idTextField.getText());
                     service.StergeCom(id);
+                    ComenziList.setAll(service.GetComenzi());
+                }
+                catch (Exception e ){
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Eroare");
+                    alert.setContentText("A aparut o eroare: "+e.getMessage());
+                    alert.show();
+                }
+            }
+        });
+
+        updateButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                try{
+                    int id = Integer.parseInt(idTextField.getText());
+                    String data = dataTextField.getText();
+                    String produse = produseTextField.getText();
+
+                    service.ActCom(id, data, produse);
                     ComenziList.setAll(service.GetComenzi());
                 }
                 catch (Exception e ){

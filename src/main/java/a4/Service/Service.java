@@ -83,6 +83,17 @@ public class Service {
         repoC.Act(comanda);
     }
 
+    public void ActCom(int id, String data, String p)throws Exception{
+        ArrayList<Produs> produse = new ArrayList<>();
+
+        int[] Ids = StringToArray(p);
+        for (int i : Ids) {
+            produse.add(repoP.getElementById(i));
+        }
+        Comanda comanda = new Comanda(id, data, produse);
+        repoC.Act(comanda);
+    }
+
     public List<String> GetCategories(){
         List<String> categori = repoP.getList().stream()
                 .map(Produs::getCategorie)
