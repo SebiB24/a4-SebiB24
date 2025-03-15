@@ -33,6 +33,26 @@ public class Service {
         repoC.add(com);
     }
 
+    private int[] StringToArray(String str) {
+        String[] parts = str.replaceAll("[\\[\\] ]", "").split(",");
+
+        return Arrays.stream(parts)
+                .mapToInt(Integer::parseInt)
+                .toArray();
+    }
+
+    public void AddCom(int id, String data, String p)throws Exception{
+        ArrayList<Produs> produse = new ArrayList<>();
+
+        int[] Ids = StringToArray(p);
+        for (int i : Ids) {
+            produse.add(repoP.getElementById(i));
+        }
+
+        Comanda com = new Comanda(id, data, produse);
+        repoC.add(com);
+    }
+
     public ArrayList<Produs> GetProduse(){
         return repoP.getList();
     }

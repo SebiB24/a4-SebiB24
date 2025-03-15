@@ -19,6 +19,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -207,7 +208,7 @@ public class MagazinElectronice extends Application {
             @Override
             public void handle(MouseEvent mouseEvent) {
                 ObservableList<Produs> ProduseSortateList = FXCollections.observableArrayList(service.GetProdusSortat());
-                    table.setItems(ProduseSortateList);
+                table.setItems(ProduseSortateList);
             }
         });
 
@@ -295,7 +296,29 @@ public class MagazinElectronice extends Application {
                 Comanda selctedComanda = (Comanda) table.getSelectionModel().getSelectedItem();
                 idTextField.setText(String.valueOf(selctedComanda.getId()));
                 dataTextField.setText(selctedComanda.getData_livrare());
-                produseTextField.setText(String.valueOf(selctedComanda.getProduse()));
+                produseTextField.setText(Arrays.toString(selctedComanda.getProdusIDs()));
+            }
+        });
+
+        addButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+
+                try{
+                    int id = Integer.parseInt(idTextField.getText());
+                    String data = dataTextField.getText();
+                    String produse = produseTextField.getText();
+
+                    service.AddCom(id, data, produse);
+                    ComenziList.setAll(service.GetComenzi());
+                }
+                catch (Exception e ){
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Eroare");
+                    alert.setContentText("A aparut o eroare: "+e.getMessage());
+                    alert.show();
+                }
+
             }
         });
 

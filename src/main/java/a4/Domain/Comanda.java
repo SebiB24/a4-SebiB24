@@ -20,12 +20,6 @@ public class Comanda extends Entitate {
         this.produse = produse;
     }
 
-    /*
-    public void addProdus(Produs produs) {
-        this.produse.add(produs);
-    }
-     */
-
     public String getData_livrare() {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         return formatter.format(data_livrare);
@@ -33,6 +27,14 @@ public class Comanda extends Entitate {
 
     public ArrayList<Produs> getProduse() {
         return produse;
+    }
+
+    public int[] getProdusIDs(){
+        int[] produsIDs = new int[produse.size()];
+        for(int i = 0; i < produse.size(); i++){
+            produsIDs[i] = produse.get(i).getId();
+        }
+        return produsIDs;
     }
 
     private String CreazaListaID(){
